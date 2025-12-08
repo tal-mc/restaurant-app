@@ -1,0 +1,9 @@
+.env
+.vscode/
+README.md
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+#remove later
+mongo-user 

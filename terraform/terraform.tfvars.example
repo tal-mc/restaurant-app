@@ -1,0 +1,36 @@
+# =============================================================================
+# TERRAFORM.TFVARS.EXAMPLE
+# =============================================================================
+# Copy this file to terraform.tfvars and fill in your values.
+# DO NOT commit terraform.tfvars to git (it contains secrets)!
+#
+# For CI/CD, these are passed via -var flags or environment variables.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# REQUIRED VARIABLES
+# -----------------------------------------------------------------------------
+
+# Docker image (set by CI/CD pipeline)
+docker_image = "ghcr.io/YOUR_USERNAME/restaurant-recommendation:latest"
+
+# MongoDB Atlas connection string
+# Get this from: Atlas → Connect → Drivers → Copy connection string
+# mongodb_uri = "mongodb+srv://username:password@cluster.mongodb.net/restaurant_db"
+
+# -----------------------------------------------------------------------------
+# OPTIONAL VARIABLES (uncomment to override defaults)
+# -----------------------------------------------------------------------------
+
+# project_name = "restaurant-api"
+# environment  = "dev"              # dev, staging, prod
+# location     = "West Europe"
+# cpu_cores    = 1
+# memory_gb    = 1.5
+# log_level    = "INFO"             # DEBUG, INFO, WARNING, ERROR
+
+# Additional tags
+# tags = {
+#   team        = "backend"
+#   cost_center = "engineering"
+# }
