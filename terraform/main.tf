@@ -73,7 +73,7 @@ resource "azurerm_container_group" "api" {
     # Liveness: Restarts container if unhealthy
     # Readiness: Stops traffic if not ready
     # -------------------------------------------------------------------------
-    
+
     liveness_probe {
       http_get {
         path   = "/health"

@@ -70,7 +70,7 @@ output "environment" {
 
 output "example_commands" {
   description = "Example curl commands to test the API"
-  value = <<-EOT
+  value       = <<-EOT
     
     # Health check
     curl "http://${azurerm_container_group.api.fqdn}:8080/health"

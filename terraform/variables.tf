@@ -108,7 +108,7 @@ variable "tags" {
 locals {
   # Resource naming convention: {project}-{environment}-{resource}
   resource_prefix = "${var.project_name}-${var.environment}"
-  
+
   # Common tags applied to all resources
   common_tags = merge(
     {
