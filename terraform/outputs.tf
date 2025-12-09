@@ -51,6 +51,21 @@ output "container_name" {
 }
 
 # -----------------------------------------------------------------------------
+# LOGGING
+# -----------------------------------------------------------------------------
+
+output "log_analytics_workspace_id" {
+  description = "Log Analytics Workspace ID (for querying logs)"
+  value       = azurerm_log_analytics_workspace.main.id
+}
+
+output "log_analytics_workspace_name" {
+  description = "Log Analytics Workspace name"
+  value       = azurerm_log_analytics_workspace.main.name
+}
+
+
+# -----------------------------------------------------------------------------
 # DEPLOYMENT INFO
 # -----------------------------------------------------------------------------
 
@@ -80,5 +95,9 @@ output "example_commands" {
     curl "http://${azurerm_container_group.api.fqdn}:8080/rest?query=vegetarian%20asian"
     curl "http://${azurerm_container_group.api.fqdn}:8080/rest?query=steakhouse%20between%2010:00%20and%2022:00"
     
+    # View logs (Azure CLI)
+    az monitor log-analytics query -w ${azurerm_log_analytics_workspace.main.workspace_id} \
+      --analytics-query "ContainerInstanceLog_CL | order by TimeGenerated desc | take 50"
+
   EOT
 }

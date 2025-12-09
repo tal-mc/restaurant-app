@@ -95,6 +95,12 @@ variable "log_level" {
   }
 }
 
+variable "log_retention_days" {
+  description = "Log Analytics retention in days"
+  type        = number
+  default     = 30
+}
+
 variable "tags" {
   description = "Additional tags to apply to all resources"
   type        = map(string)

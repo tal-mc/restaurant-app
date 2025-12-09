@@ -5,10 +5,11 @@
 # Purpose: Build, push, and deploy to Azure
 #
 # FLOW:
-# 1. Build Docker image with commit SHA tag
+# 1. Build Docker image (tag: commit SHA)
 # 2. Push to GitHub Container Registry (GHCR)
-# 3. Run Terraform to update Azure Container Instance
-# 4. Run smoke tests to verify deployment
+# 3. Terraform apply (updates Azure Container Instance)
+# 4. Load restaurants.json IF it changed
+# 5. Smoke tests
 #
 # IMPORTANT: Terraform is IDEMPOTENT
 # - If only app code changed → Only container image updates
@@ -170,8 +171,54 @@ jobs:
           echo "📍 API URL: $(terraform output -raw api_url)"
           echo "❤️  Health: $(terraform output -raw health_endpoint)"
 
+  # ===========================================================================
+  # JOB 4: Load Restaurant Data (only if restaurants.json changed)
+  # ===========================================================================
+  load-data:
+    name: Load Restaurant Data
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    # Only run if restaurants.json was modified in this push
+    if: contains(github.event.head_commit.modified, 'restaurants/restaurants.json') || 
+        contains(github.event.head_commit.added, 'restaurants/restaurants.json') ||
+        github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Load restaurants into MongoDB
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        run: |
+          echo "🍽️  Loading restaurants.json into MongoDB..."
+          python scripts/load_restaurants.py
+          exit_code=$?
+          
+          if [ "$exit_code" -eq 0 ]; then
+            echo "✅ All restaurants loaded successfully"
+          elif [ "$exit_code" -eq 1 ]; then
+            echo "⚠️  Some invalid entries were skipped (valid ones inserted)"
+            # Exit 1 means some invalid - we treat this as success
+            exit 0
+          else
+            echo "❌ Fatal error loading restaurants (exit code: $exit_code)"
+            exit 1
+          fi
+
+
   # ---------------------------------------------------------------------------
-  # JOB 3: Smoke Tests
+  # JOB 4: Smoke Tests
   # ---------------------------------------------------------------------------
   smoke-test:
     name: Smoke Tests

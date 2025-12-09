@@ -26,6 +26,23 @@ resource "azurerm_resource_group" "main" {
 }
 
 # -----------------------------------------------------------------------------
+# LOG ANALYTICS WORKSPACE (Persistent Logging)
+# -----------------------------------------------------------------------------
+# Container logs are shipped here for retention and querying.
+# Query logs via Azure Portal → Log Analytics → Logs (Kusto)
+# -----------------------------------------------------------------------------
+
+resource "azurerm_log_analytics_workspace" "main" {
+  name                = "log-${local.resource_prefix}"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  sku                 = "PerGB2018"
+  retention_in_days   = var.log_retention_days
+
+  tags = local.common_tags
+}
+
+# -----------------------------------------------------------------------------
 # CONTAINER INSTANCE
 # -----------------------------------------------------------------------------
 # Runs the Docker container with the FastAPI application.
@@ -102,11 +119,18 @@ resource "azurerm_container_group" "api" {
   }
 
   # ---------------------------------------------------------------------------
-  # LIFECYCLE CONFIGURATION
+  # LOG ANALYTICS INTEGRATION
   # ---------------------------------------------------------------------------
-  # create_before_destroy: Creates new container before destroying old one
-  # This minimizes downtime during updates.
+  # Ships container stdout/stderr to Log Analytics Workspace
   # ---------------------------------------------------------------------------
+  diagnostics {
+    log_analytics {
+      workspace_id  = azurerm_log_analytics_workspace.main.workspace_id
+      workspace_key = azurerm_log_analytics_workspace.main.primary_shared_key
+      log_type      = "ContainerInsights"
+    }
+  }
+
   lifecycle {
     create_before_destroy = true
   }
