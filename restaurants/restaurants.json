@@ -78,5 +78,13 @@
     "vegetarian": "no",
     "openHour": "11:00",
     "closeHour": "22:00"
-  }
+  },
+  {
+  "name": "Tal's Test Trattoria",
+  "style": "Italian",
+  "address": "DevOps Lane 42, Tel Aviv",
+  "vegetarian": "yes",
+  "openHour": "10:00",
+  "closeHour": "22:00"
+}
 ]
