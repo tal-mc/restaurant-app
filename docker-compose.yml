@@ -1,0 +1,38 @@
+# Docker Compose for local development
+# NOTE: This uses MongoDB Atlas (cloud) - no local MongoDB container
+# Set MONGODB_URI environment variable before running
+
+version: "3.8"
+
+services:
+  # Restaurant API Service
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: restaurant-api
+    ports:
+      - "8080:8080"
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
+      - DATABASE_NAME=${DATABASE_NAME:-restaurant_db}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_FORMAT=${LOG_FORMAT:-json}
+    volumes:
+      - ./restaurants:/app/restaurants:ro
+    restart: unless-stopped
+
+  # Data Loader (run once with: docker-compose run --rm loader)
+  loader:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: restaurant-loader
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
+      - DATABASE_NAME=${DATABASE_NAME:-restaurant_db}
+      - RESTAURANTS_FILE=/app/restaurants/restaurants.json
+    volumes:
+      - ./restaurants:/app/restaurants:ro
+    command: ["python", "scripts/load_restaurants.py"]
+    restart: "no"

@@ -1,0 +1,23 @@
+# Python / venv / cache
+__pycache__/
+*.pyc
+.venv/
+
+# Local env/secrets
+.env
+mongo-user
+
+#terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+*.auto.tfvars
+*.tfplan
+tfplan
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

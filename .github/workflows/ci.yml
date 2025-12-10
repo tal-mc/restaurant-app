@@ -1,0 +1,171 @@
+# =============================================================================
+# CI.YML - Continuous Integration
+# =============================================================================
+# Runs on: Pull Requests to main, Push to any branch
+# Purpose: Test code quality before merge
+#
+# This workflow does NOT deploy - it only validates:
+# - Unit tests pass
+# - Docker image builds successfully
+# - Data files are valid
+# =============================================================================
+
+name: CI - Test
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: ['**']  # All branches
+
+# Cancel previous runs on same branch
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # JOB 1: Run Unit Tests
+  # ---------------------------------------------------------------------------
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run tests
+        run: pytest tests/ -v --tb=short
+      
+      - name: Run tests with coverage
+        run: |
+          pip install pytest-cov
+          pytest tests/ -v --cov=app --cov-report=term-missing --cov-fail-under=80
+
+  # ---------------------------------------------------------------------------
+  # JOB 2: Validate Data Files
+  # ---------------------------------------------------------------------------
+  validate-data:
+    name: Validate restaurants.json
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Validate JSON schema
+        run: |
+          python -c "
+          import json
+          import sys
+          
+          required = {'name', 'style', 'address', 'vegetarian', 'openHour', 'closeHour'}
+          valid_vegetarian = {'yes', 'no'}
+          
+          with open('restaurants/restaurants.json') as f:
+              data = json.load(f)
+          
+          if not isinstance(data, list):
+              print('ERROR: Expected JSON array')
+              sys.exit(1)
+          
+          invalid = 0
+          for i, entry in enumerate(data):
+              errors = []
+              fields = set(entry.keys())
+              
+              if missing := required - fields:
+                  errors.append(f'missing fields: {missing}')
+              if extra := fields - required:
+                  errors.append(f'extra fields: {extra}')
+              if entry.get('vegetarian', '').lower() not in valid_vegetarian:
+                  errors.append('vegetarian must be yes/no')
+              
+              if errors:
+                  print(f'Entry {i} ({entry.get(\"name\", \"unknown\")}): {errors}')
+                  invalid += 1
+          
+          print(f'\\nValidated {len(data)} entries, {invalid} invalid')
+          
+          # Note: We warn but don't fail (invalid entries are skipped during loading)
+          if invalid > 0:
+              print('Some entries will be skipped during data loading')
+          "
+
+  # ---------------------------------------------------------------------------
+  # JOB 3: Build Docker Image (No Push)
+  # ---------------------------------------------------------------------------
+  docker-build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [test]  # Only run if tests pass
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build image (test only - no push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: restaurant-recommendation:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ---------------------------------------------------------------------------
+  # JOB 4: Terraform Validate (Syntax Check Only)
+  # ---------------------------------------------------------------------------
+  terraform-validate:
+    name: Validate Terraform
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+      
+      - name: Terraform Format Check
+        working-directory: terraform
+        run: terraform fmt -check -recursive
+      
+      - name: Terraform Init (local backend for validation)
+        working-directory: terraform
+        run: |
+          # Use local backend for validation only
+          cat > backend_override.tf << 'EOF'
+          terraform {
+            backend "local" {
+              path = "/tmp/terraform.tfstate"
+            }
+          }
+          EOF
+          terraform init
+      
+      - name: Terraform Validate
+        working-directory: terraform
+        run: terraform validate

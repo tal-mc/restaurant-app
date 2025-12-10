@@ -1,0 +1,90 @@
+[
+  {
+    "name": "Pasta Delight",
+    "style": "Italian",
+    "address": "Maskit St 35, Herzliya",
+    "vegetarian": "yes",
+    "openHour": "10:00",
+    "closeHour": "22:00"
+  },
+  {
+    "name": "Dragon Palace",
+    "style": "Asian",
+    "address": "Rothschild Blvd 50, Tel Aviv",
+    "vegetarian": "no",
+    "openHour": "11:00",
+    "closeHour": "23:00"
+  },
+  {
+    "name": "The Grill House",
+    "style": "Steakhouse",
+    "address": "HaYarkon St 120, Tel Aviv",
+    "vegetarian": "no",
+    "openHour": "12:00",
+    "closeHour": "23:30"
+  },
+  {
+    "name": "Mediterranean Breeze",
+    "style": "Mediterranean",
+    "address": "Ben Yehuda St 80, Tel Aviv",
+    "vegetarian": "yes",
+    "openHour": "09:00",
+    "closeHour": "21:00"
+  },
+  {
+    "name": "Sakura Sushi",
+    "style": "Asian",
+    "address": "Dizengoff St 200, Tel Aviv",
+    "vegetarian": "yes",
+    "openHour": "12:00",
+    "closeHour": "22:30"
+  },
+  {
+    "name": "Mama Mia Pizzeria",
+    "style": "Italian",
+    "address": "Allenby St 45, Tel Aviv",
+    "vegetarian": "yes",
+    "openHour": "11:30",
+    "closeHour": "23:30"
+  },
+  {
+    "name": "Prime Cut Steaks",
+    "style": "Steakhouse",
+    "address": "Ibn Gabirol St 30, Tel Aviv",
+    "vegetarian": "no",
+    "openHour": "18:00",
+    "closeHour": "23:00"
+  },
+  {
+    "name": "Olive Garden Med",
+    "style": "Mediterranean",
+    "address": "King George St 15, Tel Aviv",
+    "vegetarian": "no",
+    "openHour": "10:00",
+    "closeHour": "22:00"
+  },
+  {
+    "name": "Wok This Way",
+    "style": "Asian",
+    "address": "Herzl St 100, Haifa",
+    "vegetarian": "no",
+    "openHour": "10:00",
+    "closeHour": "21:00"
+  },
+  {
+    "name": "La Cucina",
+    "style": "Italian",
+    "address": "Jaffa St 25, Jerusalem",
+    "vegetarian": "no",
+    "openHour": "11:00",
+    "closeHour": "22:00"
+  },
+  {
+  "name": "Tal's Test Trattoria",
+  "style": "Italian",
+  "address": "DevOps Lane 42, Tel Aviv",
+  "vegetarian": "yes",
+  "openHour": "10:00",
+  "closeHour": "22:00"
+}
+]
